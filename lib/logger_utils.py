@@ -2,10 +2,11 @@
 import os
 import logging
 from datetime import datetime
-from api_balance import balance
+from lib.api_balance import balance
 
 # 建立 logs 資料夾
-log_dir = "C:/Users/jay00/OneDrive/桌面/zeroday_logger/logs"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+log_dir = os.path.join(base_dir,"logs")
 os.makedirs(log_dir, exist_ok=True)
 
 now_str = datetime.now().strftime("%Y%m%d_%H%M%S")

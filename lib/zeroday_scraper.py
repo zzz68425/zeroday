@@ -4,10 +4,12 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import re
 import time
-from logger_utils import logger
+from lib.logger_utils import logger
+from lib.config import API_KEY
+from lib.api_balance import balance
 
 # ===== 共用設定 =====
-KEY = "jina_52651cb7f287474db4b5d806f80e4c5aDL6vec4YpEmbZQPrQn_39FcaBB5i"
+KEY = API_KEY
 TOKEN = f"Bearer {KEY}"
 HEADERS = {
     "Authorization": TOKEN,
@@ -90,8 +92,9 @@ def fetch_with_retry(url, headers, retries=3, delay=5):
             if res.status_code == 200:
                 return res
             else:
-                logger.warning(f"第 {i+1} 次嘗試，第 {url} 頁回應狀態碼：{res.status_code}")
+                logger.warning(f"第 {i+1} 次嘗試，{url} 回應狀態碼：{res.status_code}")
         except Exception as e:
             logger.error(f"第 {i+1} 次嘗試失敗，錯誤：{e}")
         time.sleep(delay)
+    logger.warning(f"token剩餘 : {balance}")
     return None

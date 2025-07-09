@@ -1,0 +1,2 @@
+直接執行main_crawler.py即可
+API_KEY跟SENDER_EMAIL和RECEIVER_EMAIL都在config設定

@@ -1,12 +1,13 @@
+#db.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from models import Base, Category, Severity, Institution
+from lib.db.models import Base, Category, Severity, Institution
 import pandas as pd
 import os
 
 # 尋找路徑
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "zddd.sqlite")
+db_path = os.path.join(BASE_DIR, "zddd.db")
 DATABASE_URL = f"sqlite:///{db_path}"
 
 engine = create_engine(DATABASE_URL, echo=False)
@@ -42,15 +43,15 @@ def init_db():
             print("severity 資料已匯入")
 
         # 匯入 institution.csv（若檔案存在）
-        csv_path = "institution.csv"
+        csv_path = "lib/db/institution.csv"
         if os.path.exists(csv_path):
             try:
                 df = pd.read_csv(csv_path, dtype=str)
                 if "sn" in df.columns:
                     added = 0
-                    for _, row in df.iterrows():
-                        exists = session.query(Institution).filter_by(id=row["id"]).first()
-                        if not exists:
+                    exists = session.query(Institution).first()
+                    if not exists:
+                        for _, row in df.iterrows():                        
                             inst = Institution(
                                 sn=int(row["sn"]),
                                 id=row["id"],
@@ -58,7 +59,8 @@ def init_db():
                                 domain_name=row["domain_name"]
                             )
                             session.add(inst)
-                            added += 1
+                        added += 1
+                    
                     if added > 0:
                         print("institution.csv 匯入完成")
                 else:

@@ -1,0 +1,14 @@
+[project]
+name = "zeroday-logger"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "pandas>=2.3.0",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.4",
+    "sqlacodegen>=3.0.0",
+    "sqlalchemy>=2.0.41",
+]

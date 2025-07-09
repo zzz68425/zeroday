@@ -1,6 +1,6 @@
 import requests
+from lib.config import API_KEY
 
-API_KEY = "jina_52651cb7f287474db4b5d806f80e4c5aDL6vec4YpEmbZQPrQn_39FcaBB5i"
 url = f"https://embeddings-dashboard-api.jina.ai/api/v1/api_key/fe_user?api_key={API_KEY}"
 
 res = requests.get(url)

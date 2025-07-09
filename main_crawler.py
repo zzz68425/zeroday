@@ -1,10 +1,14 @@
 # main_crawler.py
-from zeroday_scraper import get_zd_ids_until
-from process_vulnerability import process_vulnerability
+from lib.zeroday_scraper import get_zd_ids_until
+from lib.process_vulnerability import process_vulnerability
 import time, random, sys
-from db import init_db, SessionLocal
-from models import Incident
-from logger_utils import logger, log_error, log_failed
+from lib.db.db import init_db, SessionLocal
+from lib.db.models import Incident
+from lib.logger_utils import logger, log_error, log_failed
+from lib.send_report import send_category1_report
+from dotenv import load_dotenv
+from lib.config  import SENDER_EMAIL, RECEIVER_EMAIL
+import os
 
 init_db()
 session = SessionLocal()
@@ -21,14 +25,19 @@ else:
 
 print(f"\n共獲得 {len(zd_ids)} 筆 ZD ID")
 
+category_1_ids = []
+stop_processing = False  # 用來標記是否停止抓取後續資料
+
 for index, zdid in enumerate(zd_ids, start=1):
+    if stop_processing:
+        break  # 如果已經標記需要停止處理，跳出外層循環
+    
     for attempt in range(3):
         logger.info(f"第 {index}/{len(zd_ids)} 筆：處理 {zdid}（第 {attempt+1} 次嘗試）")
-        result = process_vulnerability(zdid)
+        result = process_vulnerability(zdid, category_1_ids)
 
         if result in ("ok", "exists"):
             delay = random.uniform(2.5, 4.5)
-            #print(f"等待 {delay:.1f} 秒後繼續...\n")
             #time.sleep(delay)
             break
         else:
@@ -39,6 +48,14 @@ for index, zdid in enumerate(zd_ids, start=1):
             else:
                 logger.info(f"{zdid} 三次皆擷取失敗，終止程式\n")
                 log_failed(zdid)
-                sys.exit(1)
+                stop_processing = True
+                break
 
+# mail通知使用者
+send_category1_report(
+    category_1_ids,
+    sender_email=SENDER_EMAIL,
+    receiver_email=RECEIVER_EMAIL,
+    app_password=os.getenv("APP_PASSWORD")# 要去google設定
+)
 session.close()
