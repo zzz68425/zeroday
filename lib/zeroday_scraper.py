@@ -1,4 +1,4 @@
-# zeroday_scraper.py
+# 抓學校網域跟zeroday頁數筆數
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -52,16 +52,36 @@ def get_zd_ids_until(target_zdid):
     zd_ids = []
     page = 1
     found = False
+
     while True:
-        url = f"https://r.jina.ai/https://zeroday.hitcon.org/vulnerability/disclosed/page/{page}"
-        res = fetch_with_retry(url, HEADERS, retries=3, delay=5)
-        if res is None:
+        retry_count = 0
+        max_retries = 3
+        page_soup = None
+
+        # 新增：嘗試取得有 <li class="code"> 的正常頁面
+        while retry_count < max_retries:
+            url = f"https://r.jina.ai/https://zeroday.hitcon.org/vulnerability/disclosed/page/{page}"
+            res = fetch_with_retry(url, HEADERS, retries=3, delay=5)
+            if res is None:
+                logger.warning(f"頁面第 {page} 無回應，跳出 retry")
+                break  # fetch 已經有 retry，這邊只重試 HTML 結構問題
+
+            res.encoding = "utf-8"
+            soup = BeautifulSoup(res.text, "html.parser")
+            if soup.find("li", class_="code"):
+                page_soup = soup
+                break  # 確認抓到正常資料，跳出 retry
+
+            retry_count += 1
+            logger.warning(f"頁面第 {page} 沒抓到 ZD-ID，第 {retry_count} 次重試中...")
+            time.sleep(2)
+
+        if page_soup is None:
+            logger.warning(f"頁面第 {page} 無法取得有效 ZD-ID，停止抓取")
             break
-        res.encoding = "utf-8"
-        soup = BeautifulSoup(res.text, "html.parser")
 
         page_found_any = False
-        for li in soup.find_all("li", class_="code"):
+        for li in page_soup.find_all("li", class_="code"):
             match = re.search(r"(ZD-\d{4}-\d{5})", li.get_text(strip=True))
             if match:
                 zdid = match.group(1)
@@ -88,7 +108,7 @@ def get_zd_ids_until(target_zdid):
 def fetch_with_retry(url, headers, retries=3, delay=5):
     for i in range(retries):
         try:
-            res = requests.get(url, headers=headers, timeout=40)
+            res = requests.get(url, headers=headers, timeout=60)
             if res.status_code == 200:
                 return res
             else:

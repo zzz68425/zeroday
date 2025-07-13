@@ -1,4 +1,4 @@
-# main_crawler.py
+# 主程式
 from lib.zeroday_scraper import get_zd_ids_until
 from lib.process_vulnerability import process_vulnerability
 import time, random, sys

@@ -1,4 +1,4 @@
-# send_report.py
+# 寄信設定
 
 import smtplib
 from email.message import EmailMessage

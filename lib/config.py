@@ -1,4 +1,5 @@
-API_KEY="jina_ebf91ad92f564f0bb75678f53561c3b9-Hvd3aVjM4_vG9qmZZpe8QNpOOJ7"
+API_KEY="jina_9fc03fd4542e461ba6ef5cecf4d393426ZrBYDEkUL107ltbt6JHvBv7g9z6"
 
-SENDER_EMAIL="cba109049@gmail.com"
-RECEIVER_EMAIL="cba109049@gmail.com, jay00014142523@gmail.com" #多個MAIL之間需逗號隔開
+#改成自己需要的mail
+SENDER_EMAIL="xxxxxxx@gmail.com"
+RECEIVER_EMAIL="xxxxxx@gmail.com, xxxxxx@gmail.com" #多個MAIL之間需逗號隔開

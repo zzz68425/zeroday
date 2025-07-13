@@ -1,4 +1,4 @@
-#db.py
+#資料庫初始設定
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from lib.db.models import Base, Category, Severity, Institution
