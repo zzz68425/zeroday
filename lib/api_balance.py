@@ -1,7 +1,8 @@
 #用來查餘額
 import requests
-from lib.config import API_KEY
+import os
 
+API_KEY = os.getenv("JINA_API_KEY")
 url = f"https://embeddings-dashboard-api.jina.ai/api/v1/api_key/fe_user?api_key={API_KEY}"
 
 res = requests.get(url)

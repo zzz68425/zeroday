@@ -5,10 +5,14 @@ from datetime import datetime
 import re
 import time
 from lib.logger_utils import logger
-from lib.config import API_KEY
 from lib.api_balance import balance
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # ===== 共用設定 =====
+API_KEY = os.getenv("JINA_API_KEY")
 KEY = API_KEY
 TOKEN = f"Bearer {KEY}"
 HEADERS = {
@@ -54,6 +58,7 @@ def get_zd_ids_until(target_zdid):
     found = False
 
     while True:
+        logger.info(f"正在爬第 {page} 頁...")
         retry_count = 0
         max_retries = 3
         page_soup = None

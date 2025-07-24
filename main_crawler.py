@@ -7,8 +7,9 @@ from lib.db.models import Incident
 from lib.logger_utils import logger, log_error, log_failed
 from lib.send_report import send_category1_report
 from dotenv import load_dotenv
-from lib.config  import SENDER_EMAIL, RECEIVER_EMAIL
 import os
+
+load_dotenv()
 
 init_db()
 session = SessionLocal()
@@ -54,8 +55,8 @@ for index, zdid in enumerate(zd_ids, start=1):
 # mail通知使用者
 send_category1_report(
     category_1_ids,
-    sender_email=SENDER_EMAIL,
-    receiver_email=RECEIVER_EMAIL,
-    app_password=os.getenv("APP_PASSWORD")# 要去google設定
+    sender_email=os.getenv("SENDER_EMAIL"),
+    receiver_email=os.getenv("RECEIVER_EMAIL"),
+    app_password=os.getenv("GOOGLE_APP_PASSWORD")# 要去google設定
 )
 session.close()

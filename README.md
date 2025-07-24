@@ -9,11 +9,19 @@ python-dotenv
 requests
 sqlacodegen
 ## .env Setting
-APP_PASSWORD
-取得方法如:
-https://steam.oxxostudio.tw/category/python/example/gmail.html
+JINA_API_KEY  
+GOOGLE_APP_PASSWORD  
+SENDER_EMAIL  
+RECIPIENT_EMAIL  
 ## Usage
-1.建一個.env並設置APP_PASSWORD
-2.在config.py中輸入jina金鑰、寄件者、收件者,jina金鑰在 https://jina.ai/zh-TW/ 取得
-3.在main_crawler.py執行程式
-4.可以在logs資料夾查看擷取結果
+1. 安裝 Git 版本控制軟體  
+2. 安裝 uv 套件管理軟體  
+3. 複製 GitHub 儲存庫  
+4. 取得 Google 應用程式密碼  取得方法:
+https://steam.oxxostudio.tw/category/python/example/gmail.html  
+5. 取得 Jina API Key  取得方法:開無痕視窗查https://jina.ai/zh-TW/
+6. 複製 .env.example 為 .env  
+7. 設定 GOOGLE_APP_PASSWORD 環境變數（於第 4 步取得）  
+8. 設定 JINA_API_KEY 環境變數（於第 5 步取得）  
+9. 設定 SENDER_EMAIL 環境變數（教育網站彙報的寄件者）  
+10. 設定 RECIPIENT_EMAIL 環境變數（教育網站彙報的收件者）
