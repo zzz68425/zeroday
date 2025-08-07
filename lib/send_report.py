@@ -3,30 +3,31 @@ import smtplib
 from email.message import EmailMessage
 import io
 import pandas as pd
+from datetime import datetime
 
 
-def send_category1_report_from_df(df: pd.DataFrame, sender_email: str, receiver_email: str, app_password: str):
-    if df.empty:
-        print("DataFrame 為空，未寄送 email")
-        return
-
+def send_category1_report_from_df(df: pd.DataFrame, total: int, sender_email: str, receiver_email: str, app_password: str):
+    
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     msg = EmailMessage()
-    msg["Subject"] = f"本次共擷取到 {len(df)} 筆 category=1 漏洞清單"
+    msg["Subject"] = f"ZeroDay 擷取報告"
     msg["From"] = sender_email
     msg["To"] = receiver_email
-    msg.set_content("請見附件的 CSV 漏洞報告")
+    msg.set_content(f"本次於 {now_str} 擷取 {total} 筆網站 {len(df)} 筆教育網站")
 
-    # 轉換成 CSV bytes 附件
-    buffer = io.StringIO() #建立文字緩衝區
-    df.to_csv(buffer, index=False, encoding="utf-8-sig")
-    csv_bytes = buffer.getvalue().encode("utf-8-sig")
+    if not df.empty:
+        # 轉換成 CSV bytes 附件
+        buffer = io.StringIO() #建立文字緩衝區
+        df.to_csv(buffer, index=False, encoding="utf-8-sig")
+        csv_bytes = buffer.getvalue().encode("utf-8-sig")
 
-    msg.add_attachment(
-        csv_bytes,
-        maintype="application",
-        subtype="octet-stream",
-        filename="category1_report.csv"
-    )
+        msg.add_attachment(
+            csv_bytes,
+            maintype="application",
+            subtype="octet-stream",
+            filename="category1_report.csv"
+        )
 
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as smtp:

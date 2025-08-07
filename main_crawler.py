@@ -69,6 +69,7 @@ for index, zdid in enumerate(zd_ids, start=1):
 df = query_category1_df()
 send_category1_report_from_df(
     df,
+    len(zd_ids),
     sender_email=os.getenv("SENDER_EMAIL"),
     receiver_email=os.getenv("RECEIVER_EMAIL"),
     app_password=os.getenv("GOOGLE_APP_PASSWORD")# 要去google設定
