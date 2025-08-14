@@ -1,10 +1,10 @@
-#查詢category = 1的編號
+# 查詢 category = 1 的編號，限定 Incident.id 範圍
 import pandas as pd
 from lib.db.db import SessionLocal
 from lib.db.models import Incident, Target, Category, Institution, Severity, Vulnerability
 
 
-def query_category1_df() -> pd.DataFrame:
+def query_category1_df(start_sn: int) -> pd.DataFrame:
     session = SessionLocal()
     query = (
         session.query(
@@ -28,6 +28,7 @@ def query_category1_df() -> pd.DataFrame:
         .join(Incident.vulnerability)
         .join(Incident.severity)
         .filter(Category.domain_name == 'edu.tw')
+        .filter(Incident.sn >= start_sn)
     )
 
     df = pd.DataFrame(query.all(), columns=[

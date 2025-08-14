@@ -2,9 +2,11 @@ from typing import List, Optional
 
 from sqlalchemy import Column, Computed, DateTime, ForeignKey, Index, Integer, Table, Text, UniqueConstraint, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-import datetime
+from datetime import datetime, timedelta, timezone
 
 
+def taiwan_time():
+    return datetime.now(timezone(timedelta(hours=8))).replace(microsecond=0)
 
 
 class Base(DeclarativeBase):
@@ -80,8 +82,8 @@ class Incident(Base):
     vendor: Mapped[str] = mapped_column(Text)
     severity_sn: Mapped[int] = mapped_column(ForeignKey('severity.sn'))
     vulnerability_sn: Mapped[int] = mapped_column(ForeignKey('vulnerability.sn'))
-    when_start: Mapped[datetime.datetime] = mapped_column(DateTime)
-    when_ended: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+    when_start: Mapped[datetime] = mapped_column(DateTime)
+    when_ended: Mapped[Optional[datetime]] = mapped_column(DateTime)
     year_started: Mapped[Optional[int]] = mapped_column(Integer, Computed("STRFTIME('%Y', `when_start`)", persisted=True))
     duration: Mapped[Optional[int]] = mapped_column(
         Integer,
@@ -92,7 +94,7 @@ class Incident(Base):
             END
         """, persisted=True)
     )
-    when_crawled: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=text('CURRENT_TIMESTAMP'))
+    when_crawled: Mapped[datetime] = mapped_column(DateTime, default=taiwan_time)
 
     severity: Mapped['Severity'] = relationship('Severity', back_populates='incident')
     vulnerability: Mapped['Vulnerability'] = relationship('Vulnerability', back_populates='incident')

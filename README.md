@@ -21,6 +21,7 @@ JINA_API_KEY
 GOOGLE_APP_PASSWORD
 SENDER_EMAIL
 RECIPIENT_EMAIL
+RETRY_COUNT
 ```
 
 ## Usage
@@ -36,5 +37,6 @@ RECIPIENT_EMAIL
 8. 設定 `JINA_API_KEY` 環境變數（於第 5 步取得）
 9. 設定 `SENDER_EMAIL` 環境變數（教育網站彙報的寄件者）
 10. 設定 `RECIPIENT_EMAIL` 環境變數（教育網站彙報的收件者）
-11. 執行 main_crawler.py
-12. 若資料庫為空則須在 terminal 輸入爬取編號
+11. 設定`RETRY_COUNT` 環境變數（每次爬取的嘗試次數）
+12. 執行 main_crawler.py
+13. 若資料庫為空則須在 terminal 輸入爬取編號

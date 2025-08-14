@@ -60,13 +60,13 @@ def get_zd_ids_until(target_zdid):
     while True:
         logger.info(f"正在爬第 {page} 頁...")
         retry_count = 0
-        max_retries = 3
+        max_retries = int(os.getenv("RETRY_COUNT", 3))
         page_soup = None
 
         # 新增：嘗試取得有 <li class="code"> 的正常頁面
         while retry_count < max_retries:
             url = f"https://r.jina.ai/https://zeroday.hitcon.org/vulnerability/disclosed/page/{page}"
-            res = fetch_with_retry(url, HEADERS, retries=3, delay=5)
+            res = fetch_with_retry(url, HEADERS, retries=int(os.getenv("RETRY_COUNT", 3)), delay=5)
             if res is None:
                 logger.warning(f"頁面第 {page} 無回應，跳出 retry")
                 break  # fetch 已經有 retry，這邊只重試 HTML 結構問題

@@ -8,14 +8,13 @@ from lib.logger_utils import logger, log_error, log_failed
 from lib.send_report import send_category1_report_from_df
 from lib.query import query_category1_df
 from dotenv import load_dotenv
+import pandas as pd
 import os
 import re
 
 load_dotenv()
-
 init_db()
 session = SessionLocal()
-
 
 # 輸入目標 ZD-ID 並驗證格式
 def input_valid_zdid():
@@ -25,8 +24,7 @@ def input_valid_zdid():
             return zdid
         print("格式錯誤，請重新輸入。例如：ZD-2025-00245")
 
-
-# 輸入目標 ZD-ID
+# 找出此次程式要處理的所有編號
 first_row = session.query(Incident.id).order_by(Incident.sn.desc()).first()
 if first_row is None:
     target_id = input_valid_zdid()
@@ -40,22 +38,21 @@ else:
 print(f"\n共獲得 {len(zd_ids)} 筆 ZD ID")
 
 category_1_ids = []
-stop_processing = False  # 用來標記是否停止抓取後續資料
+stop_processing = False
 
+# 處理每個 ZD-ID
 for index, zdid in enumerate(zd_ids, start=1):
     if stop_processing:
-        break  # 如果已經標記需要停止處理，跳出外層循環
-    
-    for attempt in range(3):
+        break
+    for attempt in range(int(os.getenv("RETRY_COUNT", 3 ))):
         logger.info(f"第 {index}/{len(zd_ids)} 筆：處理 {zdid}（第 {attempt+1} 次嘗試）")
         result = process_vulnerability(zdid, category_1_ids)
-
         if result in ("ok", "exists"):
             delay = random.uniform(2.5, 4.5)
-            #time.sleep(delay)
+            # time.sleep(delay)
             break
         else:
-            log_error(zdid, attempt+1)
+            log_error(zdid, attempt + 1)
             if attempt <= 1:
                 print("等待 10 秒後重試...\n")
                 time.sleep(10)
@@ -65,13 +62,25 @@ for index, zdid in enumerate(zd_ids, start=1):
                 stop_processing = True
                 break
 
-# mail通知使用者
-df = query_category1_df()
+
+# 從這次程式寫入的編號中找出第一筆作為索引找sn
+first_zdid = zd_ids[0] if zd_ids else None
+start_sn = None
+if first_zdid:
+    incident = session.query(Incident).filter_by(id=first_zdid).first()
+    if incident:
+        start_sn = incident.sn
+
+# 查詢本次擷取範圍內的 category=1
+df = query_category1_df(start_sn) if start_sn else pd.DataFrame()
+
+# 寄送 Email
 send_category1_report_from_df(
     df,
     len(zd_ids),
     sender_email=os.getenv("SENDER_EMAIL"),
     receiver_email=os.getenv("RECEIVER_EMAIL"),
-    app_password=os.getenv("GOOGLE_APP_PASSWORD")# 要去google設定
+    app_password=os.getenv("GOOGLE_APP_PASSWORD")
 )
+
 session.close()

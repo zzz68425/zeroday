@@ -9,12 +9,13 @@ from datetime import datetime
 def send_category1_report_from_df(df: pd.DataFrame, total: int, sender_email: str, receiver_email: str, app_password: str):
     
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_date = datetime.now().strftime("%Y%m%d")
     
     msg = EmailMessage()
     msg["Subject"] = f"ZeroDay 擷取報告"
     msg["From"] = sender_email
     msg["To"] = receiver_email
-    msg.set_content(f"本次於 {now_str} 擷取 {total} 筆網站 {len(df)} 筆教育網站")
+    msg.set_content(f"本次於 {now_str} 擷取 {total} 筆網站 ， 其中有 {len(df)} 筆是教育網站。")
 
     if not df.empty:
         # 轉換成 CSV bytes 附件
@@ -26,7 +27,7 @@ def send_category1_report_from_df(df: pd.DataFrame, total: int, sender_email: st
             csv_bytes,
             maintype="application",
             subtype="octet-stream",
-            filename="category1_report.csv"
+            filename=f"result_{now_date}.csv"
         )
 
     try:
