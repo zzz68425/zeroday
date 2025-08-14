@@ -16,6 +16,25 @@ load_dotenv()
 init_db()
 session = SessionLocal()
 
+# 處理弱點資料的函式，包含重試機制  
+def process_with_retry(zdid, category_1_ids, index=None, total=None):
+    max_retry = int(os.getenv("RETRY_COUNT", 3))
+    logger.info(f"第 {index}/{total} 筆：處理 {zdid}")
+    for attempt in range(max_retry):
+        #logger.info(f"第 {index}/{total} 筆：處理 {zdid}（第 {attempt + 1} 次）")
+
+        try:
+            result = process_vulnerability(zdid, category_1_ids)
+            return result
+        except Exception as e:
+            if attempt < max_retry - 1:
+                #print("等待 10 秒後重試...")
+                time.sleep(10)
+            else:
+                logger.error(f"{zdid} 失敗（第 {max_retry} 次）：{e}")
+                log_failed(zdid)
+                return "fail"
+
 # 輸入目標 ZD-ID 並驗證格式
 def input_valid_zdid():
     while True:
@@ -44,23 +63,12 @@ stop_processing = False
 for index, zdid in enumerate(zd_ids, start=1):
     if stop_processing:
         break
-    for attempt in range(int(os.getenv("RETRY_COUNT", 3 ))):
-        logger.info(f"第 {index}/{len(zd_ids)} 筆：處理 {zdid}（第 {attempt+1} 次嘗試）")
-        result = process_vulnerability(zdid, category_1_ids)
-        if result in ("ok", "exists"):
-            delay = random.uniform(2.5, 4.5)
-            # time.sleep(delay)
-            break
-        else:
-            log_error(zdid, attempt + 1)
-            if attempt <= 1:
-                print("等待 10 秒後重試...\n")
-                time.sleep(10)
-            else:
-                logger.info(f"{zdid} 三次皆擷取失敗，終止程式\n")
-                log_failed(zdid)
-                stop_processing = True
-                break
+    result = process_with_retry(zdid, category_1_ids, index=index, total=len(zd_ids))
+    if result == "fail":
+        stop_processing = True
+        break
+    delay = random.uniform(2.5, 4.5)
+    # time.sleep(delay)
 
 
 # 從這次程式寫入的編號中找出第一筆作為索引找sn
@@ -71,13 +79,18 @@ if first_zdid:
     if incident:
         start_sn = incident.sn
 
+# 查詢本成功寫入資料庫的incident數量
+if start_sn:
+    all = session.query(Incident).filter(Incident.sn >= start_sn).count()
+
+
 # 查詢本次擷取範圍內的 category=1
 df = query_category1_df(start_sn) if start_sn else pd.DataFrame()
 
 # 寄送 Email
 send_category1_report_from_df(
     df,
-    len(zd_ids),
+    all,
     sender_email=os.getenv("SENDER_EMAIL"),
     receiver_email=os.getenv("RECEIVER_EMAIL"),
     app_password=os.getenv("GOOGLE_APP_PASSWORD")
