@@ -13,6 +13,7 @@ pandas
 python-dotenv
 requests
 sqlacodegen
+pydantic
 
 ## .env Setting
 
