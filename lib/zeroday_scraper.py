@@ -17,6 +17,7 @@ KEY = API_KEY
 TOKEN = f"Bearer {KEY}"
 HEADERS = {
     "Authorization": TOKEN,
+    "X-No-Cache": "true",
     "X-Return-Format": "html"
 }
 
